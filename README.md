@@ -4,7 +4,23 @@
 
 - **科目一** 基金基础知识与法律法规（依据 2026 年度修订考试大纲，教材 2025 年版）
 - 内容目录：`content/`
-- 部署：GitHub Pages（推送 `main` 自动部署）
+- 部署：GitHub Pages，由 `gh-pages` 分支直接提供
+
+## 发布方式
+
+站点是纯静态文件，**不依赖 GitHub Actions**（当前账号因账单问题无法运行 Actions）。
+
+```bash
+git add -A && git commit -m "..." && git push origin main   # 先提交主干
+./scripts/deploy.sh                                        # 再发布到 gh-pages
+```
+
+`scripts/deploy.sh` 会把工作区快照推到 `gh-pages` 分支。
+仓库 **Settings → Pages → Source** 需设为 **Deploy from a branch**，分支 **`gh-pages`**，目录 **`/ (root)`**。
+
+> `.github/workflows/pages.yml` 保留作为备用：账号恢复后，把 Source 改成 "GitHub Actions" 即可切回自动部署。
+
+站点地址：<https://emoairx.github.io/fund-exam-site/>
 
 ## 目录结构
 

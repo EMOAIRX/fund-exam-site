@@ -13,7 +13,7 @@ MAIN_REPO=$(cd "$(dirname "$0")/.." && pwd)
 cd "$MAIN_REPO"
 
 BRANCH="gh-pages"
-REMOTE="origin"
+REMOTE_URL=$(git -C "$MAIN_REPO" remote get-url origin)
 
 # 优先用本仓库配置的提交身份，没有就退回全局
 NAME=$(git config --local user.name  2>/dev/null || git config user.name  2>/dev/null || echo "EMOAIRX")
@@ -39,7 +39,7 @@ fi
 
 git commit -q -m "deploy: $(date '+%Y-%m-%d %H:%M:%S')"
 
-echo "▸ 推送到 $REMOTE/$BRANCH（$NAME <$EMAIL>）…"
-git -c credential.helper=osxkeychain push -f "$REMOTE" "$BRANCH"
+echo "▸ 推送到 ${BRANCH}（${NAME} <${EMAIL}>）…"
+GIT_TERMINAL_PROMPT=0 git -c credential.helper=osxkeychain push -f "$REMOTE_URL" "$BRANCH:refs/heads/${BRANCH}"
 
 echo "✓ 已发布： https://emoairx.github.io/fund-exam-site/"
