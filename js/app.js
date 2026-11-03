@@ -9,6 +9,7 @@
   const CONTENT_ROOT = "content/";
   const STORAGE_KEY = "fund-exam:done";
   const THEME_KEY = "fund-exam:theme";
+  const SUBJECT_KEY = "fund-exam:subject";
 
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
@@ -102,11 +103,56 @@
     if (location.hash !== h) history.pushState(null, "", h);
   }
 
+  /* ---------------- 科目切换 ---------------- */
+
+  function applySubjectBrand() {
+    const small = $(".brand-text small");
+    if (small) small.textContent = state.subject.brand || state.subject.name;
+    document.title = `基金从业 · ${state.subject.short || state.subject.name}`;
+  }
+
+  function renderSubjectSwitch() {
+    if (state.subjects.length < 2) return null;
+    const wrap = document.createElement("div");
+    wrap.className = "subj-switch";
+    state.subjects.forEach((s, i) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = s.short || s.name;
+      b.title = s.name;
+      b.setAttribute("aria-pressed", String(state.subject === s));
+      b.addEventListener("click", () => { selectSubject(i); });
+      wrap.appendChild(b);
+    });
+    return wrap;
+  }
+
+  async function selectSubject(i) {
+    const subj = state.subjects[i];
+    if (!subj || subj === state.subject) return;
+    try {
+      const cat = await fetchJSON(CONTENT_ROOT + subj.catalog);
+      state.subject = subj;
+      state.catalog = cat.chapters || [];
+      saveJSON(SUBJECT_KEY, i);
+      applySubjectBrand();
+      const first = state.catalog[0];
+      history.replaceState(null, "", "#/" + (first ? encodeURIComponent(first.file) : ""));
+      await loadPage(0, "", { replaceScroll: true });
+    } catch (err) {
+      console.error(err);
+      $("#article").innerHTML = `<p class="error">切换科目失败：${err.message}</p>`;
+    }
+  }
+
   /* ---------------- 侧栏目录 ---------------- */
 
   function renderSidebar() {
     const toc = $("#toc");
     toc.innerHTML = "";
+
+    const switcher = renderSubjectSwitch();
+    if (switcher) toc.appendChild(switcher);
 
     const group = document.createElement("div");
     group.className = "toc-group";
@@ -479,10 +525,13 @@
     state.subjects = root.subjects || [];
     if (!state.subjects.length) throw new Error("content/index.json 中没有任何科目");
 
-    const subj = state.subjects[0];
+    const saved = loadJSON(SUBJECT_KEY, 0);
+    const idx = Number.isInteger(saved) && state.subjects[saved] ? saved : 0;
+    const subj = state.subjects[idx];
     const cat = await fetchJSON(CONTENT_ROOT + subj.catalog);
     state.subject = subj;
     state.catalog = cat.chapters || [];
+    applySubjectBrand();
 
     // 菜单按钮
     $("#menu-btn").addEventListener("click", () => document.body.classList.toggle("nav-open"));
