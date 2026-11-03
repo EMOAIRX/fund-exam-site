@@ -1,3 +1,6 @@
+# 注意：当前账号因账单问题无法运行 GitHub Actions（job 不会启动）。
+# 站点改由 `gh-pages` 分支直接提供（scripts/deploy.sh），本工作流保留备用：
+# 账号恢复后，在 Settings → Pages 把 Source 改为 "GitHub Actions" 即可启用。
 name: Deploy to GitHub Pages
 
 on:
