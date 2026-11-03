@@ -293,6 +293,8 @@
       h.classList.add("is-pending");
 
       const label = h.textContent.replace(/\s+/g, " ").trim();
+      // 教材补充不是大纲知识点，不进目录、不进进度统计
+      if (h.classList.contains("is-extra")) return;
       headings.push({ id: h.id, text: label, anchor: h.id });
     });
 
