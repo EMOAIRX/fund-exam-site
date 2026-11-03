@@ -525,7 +525,8 @@
     state.subjects = root.subjects || [];
     if (!state.subjects.length) throw new Error("content/index.json 中没有任何科目");
 
-    const saved = loadJSON(SUBJECT_KEY, 0);
+    const qs = new URLSearchParams(location.search).get("s");
+    const saved = qs !== null ? Number(qs) - 1 : loadJSON(SUBJECT_KEY, 0);
     const idx = Number.isInteger(saved) && state.subjects[saved] ? saved : 0;
     const subj = state.subjects[idx];
     const cat = await fetchJSON(CONTENT_ROOT + subj.catalog);
