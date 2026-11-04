@@ -276,7 +276,7 @@ body {
 /* 已完成 / 未开始状态 */
 .prose h3.is-done { background: var(--ok-soft); border-left-color: var(--ok); }
 .prose h3.is-done::after {
-  content: "✓ 已完成";
+  content: "已完成";
   position: absolute;
   top: 12px;
   right: 12px;

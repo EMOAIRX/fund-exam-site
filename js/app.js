@@ -244,7 +244,7 @@
       a.classList.toggle("is-done", done);
       const head = page.headings.find((h) => h.id === id);
       const text = (head ? head.text : a.textContent).replace(/^\s*(✅|☑️)\s*/, "");
-      a.textContent = (done ? "✓ " : "") + text;
+      a.textContent = text;
     });
   }
 
@@ -280,7 +280,7 @@
   /**
    * 摘掉标题开头的一段文字（可能跨多个文本节点）。
    * matcher 可以是正则，也可以是字面量字符串（会转义并锚定到开头）。
-   * 例："1.1.a 【掌握】金融市场的概念 📖 P2" 依次摘掉编号与【掌握】。
+   * 例："1.1.a 【掌握】金融市场的概念 P2" 依次摘掉编号与【掌握】。
    */
   function stripLeadingText(el, matcher) {
     const re = typeof matcher === "string"
@@ -369,7 +369,7 @@
   function paintCheckBtn(btn, pageId, anchor) {
     const done = isDone(pageId, anchor);
     btn.classList.toggle("done", done);
-    btn.textContent = done ? "✓ 已完成 · 点击撤销" : "标记为已完成";
+    btn.textContent = done ? "已完成 · 点击撤销" : "标记为已完成";
   }
 
   function applyDoneClasses(root, pageId) {
@@ -419,7 +419,7 @@
       const btn = document.createElement("button");
       btn.className = "check-btn";
       btn.type = "button";
-      btn.textContent = "👀 " + summary.textContent.trim();
+      btn.textContent = summary.textContent.trim();
       btn.addEventListener("click", () => {
         $("#answer-body").innerHTML = body.innerHTML;
         $("#answer-pop").hidden = false;
@@ -458,7 +458,7 @@
       const a = document.createElement("a");
       a.className = "pager-link " + kind;
       a.href = `#/${encodeURIComponent(p.file)}`;
-      a.innerHTML = `<span class="lbl">${kind === "prev" ? "← 上一篇" : "下一篇 →"}</span><span class="ttl"></span>`;
+      a.innerHTML = `<span class="lbl">${kind === "prev" ? "上一篇" : "下一篇"}</span><span class="ttl"></span>`;
       $(".ttl", a).textContent = p.title;
       return a;
     };
