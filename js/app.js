@@ -298,12 +298,28 @@
     }
   }
 
+  /** 摘掉标题末尾的一段文字（页码），从后向前找文本节点。 */
+  function stripTrailingText(el, source) {
+    const re = new RegExp(source.source + "\\s*$");
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    let node;
+    while ((node = walker.nextNode())) nodes.push(node);
+    for (let i = nodes.length - 1; i >= 0; i--) {
+      const t = nodes[i].textContent;
+      if (!t.trim()) continue;
+      if (re.test(t)) { nodes[i].textContent = t.replace(re, "").trim(); return; }
+    }
+  }
+
   function enhanceHeadings(root, pageId) {
     const headings = [];
     $$("h2, h3, h4", root).forEach((h, i) => {
-      // 锚点先于重排标题生成，用纯文本 + 序号，避免把徽章文字或页码掺进 id
-      h.id = h.id || slugify(h.textContent.replace(/\s+/g, " ").trim(), i);
-      if (h.tagName !== "H3") return;
+      // 非知识点标题直接生成锚点；h3 先摘掉徽章与页码，再用干净文字生成 id
+      if (h.tagName !== "H3") {
+        h.id = h.id || slugify(h.textContent.replace(/\s+/g, " ").trim(), i);
+        return;
+      }
 
       const badges = [];
 
@@ -334,11 +350,25 @@
         }
       }
 
+      // 页码（标题末尾的 P123 或 P147–P155）
+      const page = h.textContent.match(/\s*P(\d+(?:\s*[–\-~]\s*P?\d+)?)\s*$/);
+      if (page) {
+        const pg = document.createElement("span");
+        pg.className = "pg-ref";
+        pg.textContent = "P" + page[1].replace(/\s/g, "").replace(/([–\-~])P/, "$1");
+        badges.push(pg);
+        stripTrailingText(h, /\s*P\d+(?:\s*[–\-~]\s*P?\d+)?/);
+      }
+
       badges.reverse().forEach((b) => h.insertBefore(b, h.firstChild));
 
+      h.id = h.id || slugify(h.textContent.replace(/\s+/g, " ").trim(), i);
       h.classList.add("is-pending");
 
-      const label = h.textContent.replace(/\s+/g, " ").trim();
+      // 目录与页内导航只用标题正文，不含编号、等级与页码徽标
+      const clean = h.cloneNode(true);
+      $$(".kcode, .lvl, .pg-ref", clean).forEach((el) => el.remove());
+      const label = clean.textContent.replace(/\s+/g, " ").trim();
       // 教材补充不是大纲知识点，不进目录、不进进度统计
       if (h.classList.contains("is-extra")) return;
       headings.push({ id: h.id, text: label, anchor: h.id });

@@ -644,3 +644,18 @@ body {
   .math-display { margin: 10px -4px; }
   .prose .table-wrap { margin: 12px -4px 16px; }
 }
+
+/* 标题末尾的页码徽标 */
+.prose h3 .pg-ref {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--text-faint);
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 0 6px;
+  margin-left: 8px;
+  vertical-align: 2px;
+  white-space: nowrap;
+}
