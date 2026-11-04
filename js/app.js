@@ -274,7 +274,7 @@
 
   function slugify(text, i) {
     const ascii = text.replace(/[^\w.\-]+/g, "");
-    return ascii ? "h-" + ascii : "h-" + i;
+    return ascii ? "h-" + ascii + "-" + i : "h-" + i;
   }
 
   /**
@@ -429,11 +429,71 @@
     });
   }
 
+  /* ---------------- 公式（KaTeX） ---------------- */
+
+  // 先把公式换成占位注释，避免 marked 把 _ * \\ 当作强调或转义。
+  function extractMath(md) {
+    const store = [];
+    let out = md.replace(/\$\$([\s\S]+?)\$\$/g, (m, tex) => {
+      store.push({ tex: tex.trim(), display: true });
+      return `<!--MATH:${store.length - 1}-->`;
+    });
+    out = out.replace(/(^|[^$\\])\$(?!\$)([^\n$]+?)\$(?!\$)/g, (m, pre, tex) => {
+      store.push({ tex: tex.trim(), display: false });
+      return `${pre}<!--MATH:${store.length - 1}-->`;
+    });
+    return { md: out, store };
+  }
+
+  function renderMath(root, store) {
+    if (!store.length) return;
+    const has = typeof window.katex !== "undefined";
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_COMMENT);
+    const hits = [];
+    let node;
+    while ((node = walker.nextNode())) {
+      const m = /^MATH:(\d+)$/.exec(node.nodeValue.trim());
+      if (m) hits.push([node, store[+m[1]]]);
+    }
+    hits.forEach(([node, item]) => {
+      if (!item) return;
+      let html;
+      if (has) {
+        try {
+          html = window.katex.renderToString(item.tex, {
+            displayMode: item.display,
+            throwOnError: false,
+            strict: false,
+          });
+        } catch (e) {
+          html = null;
+        }
+      }
+      const span = document.createElement("span");
+      if (html) {
+        span.className = "math-node";
+        span.innerHTML = html;
+      } else {
+        // KaTeX 不可用时退回原始 TeX，至少保证内容不丢
+        span.className = "math-node math-raw";
+        span.textContent = item.display ? `$$${item.tex}$$` : `$${item.tex}$`;
+      }
+      if (item.display) {
+        span.classList.add("math-display");
+        const p = node.parentElement;
+        if (p && p.tagName === "P" && p.childNodes.length <= 3) p.classList.add("math-line");
+      }
+      node.parentNode.replaceChild(span, node);
+    });
+  }
+
   function renderPage(page, src) {
     const article = $("#article");
     const { meta, body } = stripFrontMatter(src);
 
-    article.innerHTML = marked.parse(body);
+    const math = extractMath(body);
+    article.innerHTML = marked.parse(math.md);
+    renderMath(article, math.store);
 
     // 去掉正文里的第一个 h1（由页面标题统一展示，避免重复）
     const h1 = $("h1", article);

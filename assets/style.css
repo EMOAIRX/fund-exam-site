@@ -615,3 +615,32 @@ body {
   color: #fff;
   font-weight: 600;
 }
+
+/* ---------- 公式（KaTeX） ---------- */
+.math-node { display: inline; }
+.math-display { display: block; margin: 14px 0; overflow-x: auto; overflow-y: hidden; }
+.math-display .katex-display { margin: 0; }
+.math-display .katex { white-space: normal; }
+.prose p.math-line { text-align: center; }
+.prose .math-display .katex-display > .katex { font-size: 1.05em; }
+.prose table .math-display { margin: 0; }
+.prose table .math-node { white-space: nowrap; }
+.prose .math-raw {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: .92em;
+  background: var(--bg-soft);
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+
+/* 公式与表格在窄屏自适应 */
+@media (max-width: 900px) {
+  .math-display .katex { font-size: 1em; }
+  .prose .math-display { margin: 12px 0; }
+  .prose { -webkit-text-size-adjust: 100%; }
+}
+@media (max-width: 640px) {
+  .math-display .katex { font-size: .86em; }
+  .math-display { margin: 10px -4px; }
+  .prose .table-wrap { margin: 12px -4px 16px; }
+}

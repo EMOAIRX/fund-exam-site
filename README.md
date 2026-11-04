@@ -13,6 +13,7 @@
 
 - 打开方式：科目一 <https://emoairx.github.io/fund-exam-site/> ；科目二、科目三分别加 `?s=2`、`?s=3`
 - 内容目录：`content/`（每个科目一个目录，内含 `目录.json` 清单 + `00-总览与进度.md`）
+- 公式：本地内置 KaTeX 0.16.11（`js/vendor/katex/`，含 woff2 字体，不走 CDN），`$$...$$` 与行内 `$...$` 均按数学公式渲染，共 340 处
 - 部署：GitHub Pages，由 `gh-pages` 分支直接提供
 
 ## 发布方式
